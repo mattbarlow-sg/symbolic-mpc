@@ -1,21 +1,19 @@
 # Symbolic MPC Specification
 
-> **Symbolic Model‑Predictive Control (MPC)** is a lightweight, rolling‑plan format that lets an AI coding agent (and its human partner) decompose work, execute the next node, then recompute the rest of the task graph on every step.
->
-> This repo contains the JSON Schema (`symbolic-mpc.schema.json`) and reference materials so you can create and validate your own `*-symbolic-mpc.yaml` plans.
+**Symbolic Model‑Predictive Control (MPC)** is a lightweight, rolling‑plan format that lets an AI coding agent (and its human partner) decompose work, execute the next node, then recompute the rest of the task graph on every step.
+
+This repo contains the JSON Schema (`symbolic-mpc.schema.json`) and reference materials so you can create and validate your own `*-symbolic-mpc.yaml` plans.
 
 ## Why Symbolic MPC?
 
 | Classic PRD Pain       | Symbolic MPC Fix                                            |
 | ---------------------- | ----------------------------------------------------------- |
-| Waterfall, monolithic  | Rolling‑horizon planning — only the next node is locked‑in  |
+| Waterfall, monolithic  | Rolling‑horizon planning; only the next node is locked‑in  |
 | Human‑only audience    | Written for LLM agents **and** humans                       |
 | Milestones & schedules | Omitted by design; focus stays on code‑generation tasks     |
 | Free‑form prose        | Strict, machine‑checkable fields with optional rich context |
 
 ## Philosophy
-
-Materialization: Adaptive Commitment Inspired by Robotics
 
 In robotics, Model Predictive Control (MPC) plans a full trajectory, executes a single control input, then replans from the new state, a rolling-horizon strategy that keeps the robot agile in uncertain environments. materialization brings that same principle to software planning: every node carries a 0-to-1 score expressing how "locked-in" it is. The entry node (≈ 1.0) is executed with confidence, while downstream nodes decay toward 0, signaling increasing openness to change. This quantifies the insight from  Why Greatness Cannot Be Planned[^1]: rigid end-to-end blueprints invite failure, whereas flexible, step-wise commitments let emergent opportunities guide the path to success.
 
