@@ -20,21 +20,21 @@ Symbolic MPC plans are written in YAML format and should be named using the patt
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `version` | string | Specification version (currently "0.2") |
-| `plan_id` | string | Unique identifier for this plan |
-| `project_name` | string | Human-readable project name |
+| Field           | Type   | Description                                       |
+| --------------- | ------ | ------------------------------------------------- |
+| `version`       | string | Specification version (currently "0.2")           |
+| `plan_id`       | string | Unique identifier for this plan                   |
+| `project_name`  | string | Human-readable project name                       |
 | `agent_profile` | string | Target agent profile (e.g., "ai-coding-agent-v1") |
-| `architecture` | object | Architectural overview and constraints |
-| `tooling` | object | Technology stack and standards |
-| `entry_node` | string | ID of the node where execution begins |
-| `nodes` | array | List of all plan nodes |
+| `architecture`  | object | Architectural overview and constraints            |
+| `tooling`       | object | Technology stack and standards                    |
+| `entry_node`    | string | ID of the node where execution begins             |
+| `nodes`         | array  | List of all plan nodes                            |
 
 ### Optional Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field     | Type   | Description                            |
+| --------- | ------ | -------------------------------------- |
 | `context` | object | Global context shared across all nodes |
 
 ## Context Object
@@ -43,18 +43,18 @@ The `context` object provides global information that agents can reference throu
 
 ### Optional Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `business_goal` | string | High-level business objective |
-| `non_functional_requirements` | array[string] | Performance, cost, and quality constraints |
-| `personas` | array[persona] | User personas and their needs |
+| Field                         | Type           | Description                                |
+| ----------------------------- | -------------- | ------------------------------------------ |
+| `business_goal`               | string         | High-level business objective              |
+| `non_functional_requirements` | array[string]  | Performance, cost, and quality constraints |
+| `personas`                    | array[persona] | User personas and their needs              |
 
 ### Persona Object
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field  | Type   | Description                                   |
+| ------ | ------ | --------------------------------------------- |
 | `name` | string | Persona name (e.g., "PM", "Backend Engineer") |
-| `need` | string | What this persona needs from the system |
+| `need` | string | What this persona needs from the system       |
 
 ## Architecture Object
 
@@ -62,16 +62,16 @@ Defines the overall system architecture and constraints.
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field      | Type   | Description                          |
+| ---------- | ------ | ------------------------------------ |
 | `overview` | string | High-level architectural description |
 
 ### Optional Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `constraints` | array[string] | Architectural limitations and requirements |
-| `integration_points` | array[string] | External systems and interfaces |
+| Field                | Type          | Description                                |
+| -------------------- | ------------- | ------------------------------------------ |
+| `constraints`        | array[string] | Architectural limitations and requirements |
+| `integration_points` | array[string] | External systems and interfaces            |
 
 ## Tooling Object
 
@@ -79,26 +79,26 @@ Specifies the technology stack and development standards.
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `primary_language` | string | Main programming language |
-| `frameworks` | array[string] | Required frameworks and libraries |
-| `package_manager` | string | Package management tool |
+| Field              | Type          | Description                       |
+| ------------------ | ------------- | --------------------------------- |
+| `primary_language` | string        | Main programming language         |
+| `frameworks`       | array[string] | Required frameworks and libraries |
+| `package_manager`  | string        | Package management tool           |
 
 ### Optional Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `secondary_languages` | array[string] | Additional languages used |
-| `coding_standards` | object | Code quality and style requirements |
+| Field                 | Type          | Description                         |
+| --------------------- | ------------- | ----------------------------------- |
+| `secondary_languages` | array[string] | Additional languages used           |
+| `coding_standards`    | object        | Code quality and style requirements |
 
 ### Coding Standards Object
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `lint` | string | Linting configuration |
+| Field        | Type   | Description              |
+| ------------ | ------ | ------------------------ |
+| `lint`       | string | Linting configuration    |
 | `formatting` | string | Code formatting standard |
-| `testing` | string | Testing requirements |
+| `testing`    | string | Testing requirements     |
 
 ## Node Object
 
@@ -106,24 +106,24 @@ Nodes represent individual work items in the plan. Each node should be atomic an
 
 ### Required Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `id` | string | Unique node identifier |
-| `materialization` | number | Commitment level (0.0-1.0) |
-| `description` | string | Brief, one-line description |
-| `detailed_description` | string | Comprehensive execution guidance |
-| `outputs` | array[string] | Expected deliverable file paths/patterns |
-| `agent_action` | string | Specific action for the agent to take |
+| Field                  | Type          | Description                              |
+| ---------------------- | ------------- | ---------------------------------------- |
+| `id`                   | string        | Unique node identifier                   |
+| `materialization`      | number        | Commitment level (0.0-1.0)               |
+| `description`          | string        | Brief, one-line description              |
+| `detailed_description` | string        | Comprehensive execution guidance         |
+| `outputs`              | array[string] | Expected deliverable file paths/patterns |
+| `agent_action`         | string        | Specific action for the agent to take    |
 
 ### Optional Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `inputs` | array[string] | Required input files/dependencies |
-| `acceptance_criteria` | array[string] | Checklist for accepting the work |
-| `definition_of_done` | string | Clear completion criteria |
-| `required_knowledge` | array[string] | Domain knowledge needed |
-| `downstream` | array[string] | IDs of dependent nodes |
+| Field                 | Type          | Description                       |
+| --------------------- | ------------- | --------------------------------- |
+| `inputs`              | array[string] | Required input files/dependencies |
+| `acceptance_criteria` | array[string] | Checklist for accepting the work  |
+| `definition_of_done`  | string        | Clear completion criteria         |
+| `required_knowledge`  | array[string] | Domain knowledge needed           |
+| `downstream`          | array[string] | IDs of dependent nodes            |
 
 ## Field Details
 
@@ -254,5 +254,5 @@ nodes:
 
 ## References
 
-1. Stanley, K. O., & Lehman, J. (2015). *Why Greatness Cannot Be Planned: The Myth of the Objective*. Springer.
-2. Pheng, L. (2025). *Visualizing Task Breakdown: An Interactive Force-Directed Graph Approach to Task Management*. University of Virginia Technical Report.
+1. Stanley, K. O., & Lehman, J. (2015). _Why Greatness Cannot Be Planned: The Myth of the Objective_. Springer.
+2. Pheng, L. (2025). _Visualizing Task Breakdown: An Interactive Force-Directed Graph Approach to Task Management_. University of Virginia Technical Report.

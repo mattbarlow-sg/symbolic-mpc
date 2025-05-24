@@ -36,7 +36,7 @@ entry_node: "define-feature-flag-api"
 # ------------------- Symbolic MPC Nodes -----------------------------
 nodes:
   - id: "define-feature-flag-api"
-    materialization: 1.0          # Fully committed
+    materialization: 1.0 # Fully committed
     description: "Create REST endpoints to CRUD feature flags."
     detailed_description: |
       * Three routes: POST /flags, GET /flags/{id}, GET /flags
@@ -59,7 +59,7 @@ nodes:
     downstream: ["implement-dynamo-storage", "write-unit-tests"]
 
   - id: "implement-dynamo-storage"
-    materialization: 0.7          # Likely but still adjustable
+    materialization: 0.7 # Likely but still adjustable
     description: "Persist flag objects in DynamoDB."
     detailed_description: |
       * Table name: FlagsTable
