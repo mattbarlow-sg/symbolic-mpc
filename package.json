@@ -1,0 +1,34 @@
+{
+  "name": "symbolic-mpc",
+  "version": "0.2.0",
+  "description": "**Symbolic Model‑Predictive Control (MPC)** is a lightweight, rolling‑plan format that lets an AI coding agent (and its human partner) decompose work, execute the next node, then recompute the rest of the task graph on every step.",
+  "main": "index.js",
+  "directories": {
+    "example": "examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mattbarlow-sg/symbolic-mpc.git"
+  },
+  "keywords": [
+    "mpc",
+    "model-predictive-control",
+    "ai-agent",
+    "planning",
+    "task-decomposition"
+  ],
+  "author": "Matt Barlow",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mattbarlow-sg/symbolic-mpc/issues"
+  },
+  "homepage": "https://github.com/mattbarlow-sg/symbolic-mpc#readme",
+  "devDependencies": {
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "js-yaml": "^4.1.0"
+  },
+  "scripts": {
+    "test": "node test-schema.js"
+  }
+}
