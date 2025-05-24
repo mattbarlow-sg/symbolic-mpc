@@ -26,11 +26,16 @@ This project is also inspired by _Visualizing Task Breakdown: An Interactive For
 ```
 .
 ├── symbolic-mpc.schema.json   # JSON Schema (draft‑2020‑12)
+├── llm.txt                   # LLM context for generating schemas
 ├── example/
 │   └── feature-flags-symbolic-mpc.yaml
 └── docs/
     └── SPEC.md               # Full field reference
 ```
+
+### LLM Context File
+
+The `llm.txt` file provides comprehensive context about the Symbolic MPC specification for Large Language Models. This file contains the complete schema documentation, examples, and best practices to help LLMs generate valid Symbolic MPC YAML files without needing additional context or clarification.
 
 ## Quick Start
 
