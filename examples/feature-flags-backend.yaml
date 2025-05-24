@@ -1,0 +1,105 @@
+version: "0.2"
+plan_id: "symbolic-mpc-001"
+project_name: "Feature Flags Backend"
+agent_profile: "ai-coding-agent-v1"
+
+# --- Global context the agent will reuse in every node -------------
+context:
+  business_goal: "Allow product managers to toggle features per user cohort without deploys."
+  non_functional_requirements:
+    - "P99 API latency < 150 ms"
+    - "Cost ceiling: $20/month for 10 M evals"
+  personas:
+    - name: "PM"
+      need: "Enable / disable flags visually"
+    - name: "Backend Engineer"
+      need: "Query flag state with minimal latency"
+
+architecture:
+  overview: "Stateless Lambda functions fronted by API Gateway, DynamoDB for storage."
+  constraints:
+    - "No long-lived EC2 instances"
+    - "IaC via AWS CDK (TypeScript)"
+
+tooling:
+  primary_language: "TypeScript"
+  secondary_languages: ["YAML", "JSON"]
+  frameworks: ["AWS CDK", "Node.js 20", "Jest"]
+  package_manager: "pnpm"
+  coding_standards:
+    lint: "eslint-config-standard-with-typescript"
+    formatting: "prettier"
+    testing: "100 % branches on new code"
+
+entry_node: "define-feature-flag-api"
+
+# ------------------- Symbolic MPC Nodes -----------------------------
+nodes:
+  - id: "define-feature-flag-api"
+    materialization: 1.0          # Fully committed
+    description: "Create REST endpoints to CRUD feature flags."
+    detailed_description: |
+      * Three routes: POST /flags, GET /flags/{id}, GET /flags
+      * POST body schema:
+          { name: string, variations: string[], rollout: { type: "percentage", value: number } }
+      * Return 201 with Location header on create.
+      * Use AWS CDK constructs: RestApi, LambdaIntegration.
+    inputs: []
+    outputs: ["api/handlers/*.ts", "cdk/lib/api-stack.ts", "openapi.yaml"]
+    acceptance_criteria:
+      - "Local CDK synth succeeds with `cdk synth`."
+      - "OpenAPI file validates with spectral."
+      - "Handlers compile with no eslint errors."
+    definition_of_done: |
+      PR containing CDK stack, handlers, and OpenAPI spec that passes CI.
+    required_knowledge:
+      - "AWS CDK REST API patterns"
+      - "TypeScript async/await"
+    agent_action: "Generate code + OpenAPI; push commit."
+    downstream: ["implement-dynamo-storage", "write-unit-tests"]
+
+  - id: "implement-dynamo-storage"
+    materialization: 0.7          # Likely but still adjustable
+    description: "Persist flag objects in DynamoDB."
+    detailed_description: |
+      * Table name: FlagsTable
+      * Partition key: flagId (ULID)
+      * GSI-1: name -> flagId
+      * Use DocumentClient v3.
+      * Provide CRUD functions in `data/flags.ts`.
+    inputs: ["openapi.yaml", "flag handler skeletons"]
+    outputs: ["data/flags.ts", "cdk/lib/storage-stack.ts"]
+    acceptance_criteria:
+      - "`npm run test:data` passes with mocked DynamoDB."
+    definition_of_done: "Data layer code + table definition in CDK."
+    required_knowledge: ["DynamoDB modelling", "AWS SDK v3"]
+    agent_action: "Write data access layer and update CDK app."
+    downstream: ["write-integration-tests"]
+
+  - id: "write-unit-tests"
+    materialization: 0.9
+    description: "Cover handler logic with Jest."
+    detailed_description: |
+      Focus on input validation, response codes, and error paths.
+    inputs: ["handlers"]
+    outputs: ["test/handlers/*.test.ts"]
+    acceptance_criteria:
+      - ">= 95 % statement coverage on handlers."
+    definition_of_done: "Green Jest run in CI."
+    required_knowledge: ["jest", "@aws-sdk/client-mock"]
+    agent_action: "Generate tests."
+    downstream: []
+
+  - id: "write-integration-tests"
+    materialization: 0.4
+    description: "End-to-end tests hitting a local DynamoDB container."
+    detailed_description: |
+      Use dynamodb-local + aws-sdk v3. Spin up in `docker-compose.test.yml`.
+    inputs: ["FlagsTable", "data layer"]
+    outputs: ["test/integration/*.test.ts", "docker-compose.test.yml"]
+    acceptance_criteria:
+      - "All CRUD flows succeed."
+    definition_of_done: "CI workflow green on integration job."
+    required_knowledge: ["Docker", "jest"]
+    agent_action: "Write integration tests."
+    downstream: []
