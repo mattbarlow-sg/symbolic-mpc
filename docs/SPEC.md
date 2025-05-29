@@ -1,4 +1,4 @@
-# Symbolic MPC Specification v0.2
+# Symbolic MPC Specification v0.3
 
 ## Overview
 
@@ -22,7 +22,7 @@ Symbolic MPC plans are written in YAML format and should be named using the patt
 
 | Field           | Type   | Description                                       |
 | --------------- | ------ | ------------------------------------------------- |
-| `version`       | string | Specification version (currently "0.2")           |
+| `version`       | string | Specification version (currently "0.3")           |
 | `plan_id`       | string | Unique identifier for this plan                   |
 | `project_name`  | string | Human-readable project name                       |
 | `agent_profile` | string | Target agent profile (e.g., "ai-coding-agent-v1") |
@@ -109,6 +109,7 @@ Nodes represent individual work items in the plan. Each node should be atomic an
 | Field                  | Type          | Description                              |
 | ---------------------- | ------------- | ---------------------------------------- |
 | `id`                   | string        | Unique node identifier                   |
+| `status`               | string        | Node status (see Status Values below)    |
 | `materialization`      | number        | Commitment level (0.0-1.0)               |
 | `description`          | string        | Brief, one-line description              |
 | `detailed_description` | string        | Comprehensive execution guidance         |
@@ -126,6 +127,15 @@ Nodes represent individual work items in the plan. Each node should be atomic an
 | `downstream`          | array[string] | IDs of dependent nodes            |
 
 ## Field Details
+
+### Status Values
+
+The `status` field indicates the current state of a node:
+
+- **`Completed`**: Node has been successfully executed
+- **`Ready`**: Node is ready to be executed (all dependencies met)
+- **`Blocked`**: Node is waiting on dependencies or external factors
+- **`Paused`**: Node execution has been temporarily suspended
 
 ### Materialization
 
@@ -202,7 +212,7 @@ acceptance_criteria:
 ## Example Plan Structure
 
 ```yaml
-version: "0.2"
+version: "0.3"
 plan_id: "example-001"
 project_name: "Example Project"
 agent_profile: "ai-coding-agent-v1"
@@ -227,6 +237,7 @@ entry_node: "setup-project"
 
 nodes:
   - id: "setup-project"
+    status: "Ready"
     materialization: 1.0
     description: "Initialize project structure"
     detailed_description: |
@@ -237,6 +248,7 @@ nodes:
     downstream: ["implement-core-feature"]
 
   - id: "implement-core-feature"
+    status: "Blocked"
     materialization: 0.8
     description: "Build main application feature"
     detailed_description: |
@@ -249,7 +261,8 @@ nodes:
 
 ## Version History
 
-- **v0.2**: Current version with full schema specification
+- **v0.3**: Added node status field for execution tracking
+- **v0.2**: Full schema specification
 - **v0.1**: Initial draft specification
 
 ## References

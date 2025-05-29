@@ -105,6 +105,7 @@
       "type": "object",
       "required": [
         "id",
+        "status",
         "materialization",
         "description",
         "detailed_description",
@@ -114,6 +115,11 @@
       "additionalProperties": false,
       "properties": {
         "id": { "type": "string" },
+
+        "status": {
+          "type": "string",
+          "enum": ["Completed", "Ready", "Blocked", "Paused"]
+        },
 
         "materialization": {
           "type": "number",

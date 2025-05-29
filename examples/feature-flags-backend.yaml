@@ -1,4 +1,4 @@
-version: "0.2"
+version: "0.3"
 plan_id: "symbolic-mpc-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"
@@ -36,6 +36,7 @@ entry_node: "define-feature-flag-api"
 # ------------------- Symbolic MPC Nodes -----------------------------
 nodes:
   - id: "define-feature-flag-api"
+    status: "Completed"
     materialization: 1.0 # Fully committed
     description: "Create REST endpoints to CRUD feature flags."
     detailed_description: |
@@ -59,6 +60,7 @@ nodes:
     downstream: ["implement-dynamo-storage", "write-unit-tests"]
 
   - id: "implement-dynamo-storage"
+    status: "Ready"
     materialization: 0.7 # Likely but still adjustable
     description: "Persist flag objects in DynamoDB."
     detailed_description: |
@@ -77,6 +79,7 @@ nodes:
     downstream: ["write-integration-tests"]
 
   - id: "write-unit-tests"
+    status: "Ready"
     materialization: 0.9
     description: "Cover handler logic with Jest."
     detailed_description: |
@@ -91,6 +94,7 @@ nodes:
     downstream: []
 
   - id: "write-integration-tests"
+    status: "Blocked"
     materialization: 0.4
     description: "End-to-end tests hitting a local DynamoDB container."
     detailed_description: |

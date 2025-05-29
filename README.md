@@ -52,7 +52,7 @@ npm i
 Name it `<project>-symbolic-mpc.yaml`:
 
 ```yaml
-version: "0.2"
+version: "0.3"
 plan_id: "ff-backend-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"

@@ -21,6 +21,61 @@ In robotics, Model Predictive Control (MPC) plans a full trajectory, executes a 
 
 This project is also inspired by _Visualizing Task Breakdown: An Interactive Force-Directed Graph Approach to Task Management_ [Pheng (2025)](https://libraetd.lib.virginia.edu/downloads/7m01bn343?filename=Pheng_Lanah_Technical_Report.pdf).
 
+## Repo Contents
+
+```
+.
+├── symbolic-mpc.schema.json   # JSON Schema (draft‑2020‑12)
+├── llm.txt                   # LLM context for generating schemas
+├── example/
+│   └── feature-flags-symbolic-mpc.yaml
+└── docs/
+    └── SPEC.md               # Full field reference
+```
+
+### LLM Context File
+
+The `llm.txt` file provides comprehensive context about the Symbolic MPC specification for Large Language Models. This file contains the complete schema documentation, examples, and best practices to help LLMs generate valid Symbolic MPC YAML files without needing additional context or clarification.
+
+## Quick Start
+
+### 1. Clone & install a JSON‑Schema validator
+
+```bash
+git clone https://github.com/mattbarlow-sg/symbolic-mpc.git
+cd symbolic-mpc
+npm i
+```
+
+### 2. Create a plan file
+
+Name it `<project>-symbolic-mpc.yaml`:
+
+```yaml
+version: "0.3"
+plan_id: "ff-backend-001"
+project_name: "Feature Flags Backend"
+agent_profile: "ai-coding-agent-v1"
+entry_node: "define-feature-flag-api"
+nodes:
+  - id: "define-feature-flag-api"
+    materialization: 1.0
+    description: "Create REST endpoints to CRUD feature flags."
+    detailed_description: |
+      Three routes: POST /flags, GET /flags/{id}, GET /flags
+    outputs: ["api/handlers/*.ts"]
+    agent_action: "Generate code + OpenAPI"
+    downstream: ["write-unit-tests"]
+```
+
+### 3. Validate
+
+```bash
+node test-schema.js your-project-symbolic-mpc.yaml
+```
+
+If the plan is valid, you’re ready to feed the **entry node** to your AI coding agent.
+
 ## Key Concepts
 
 | Field                  | Purpose                                                                                              |
@@ -32,9 +87,6 @@ This project is also inspired by _Visualizing Task Breakdown: An Interactive For
 
 See **`docs/SPEC.md`** for the full field reference.
 
-================================================
-FILE: symbolic-mpc.schema.json
-================================================
 {
   "$id": "https://example.com/symbolic-mpc.schema.json",
   "title": "Symbolic MPC Specification",
@@ -142,6 +194,7 @@ FILE: symbolic-mpc.schema.json
       "type": "object",
       "required": [
         "id",
+        "status",
         "materialization",
         "description",
         "detailed_description",
@@ -151,6 +204,11 @@ FILE: symbolic-mpc.schema.json
       "additionalProperties": false,
       "properties": {
         "id": { "type": "string" },
+
+        "status": {
+          "type": "string",
+          "enum": ["Completed", "Ready", "Blocked", "Paused"]
+        },
 
         "materialization": {
           "type": "number",
@@ -198,11 +256,19 @@ FILE: symbolic-mpc.schema.json
   }
 }
 
-# Symbolic MPC Specification v0.2
+# Symbolic MPC Specification v0.3
+
+## Overview
+
+This document provides the complete field reference for the Symbolic Model-Predictive Control (MPC) specification. Symbolic MPC is a lightweight, rolling-plan format designed for AI coding agents and their human partners to decompose work, execute the next node, then recompute the rest of the task graph on every step.
 
 ## Schema Validation
 
 All Symbolic MPC plans must conform to the JSON Schema defined in `symbolic-mpc.schema.json`. Use a JSON Schema validator like `ajv-cli` to validate your plans:
+
+```bash
+ajv validate -s symbolic-mpc.schema.json -d your-plan.yaml
+```
 
 ## File Format
 
@@ -214,7 +280,7 @@ Symbolic MPC plans are written in YAML format and should be named using the patt
 
 | Field           | Type   | Description                                       |
 | --------------- | ------ | ------------------------------------------------- |
-| `version`       | string | Specification version (currently "0.2")           |
+| `version`       | string | Specification version (currently "0.3")           |
 | `plan_id`       | string | Unique identifier for this plan                   |
 | `project_name`  | string | Human-readable project name                       |
 | `agent_profile` | string | Target agent profile (e.g., "ai-coding-agent-v1") |
@@ -301,6 +367,7 @@ Nodes represent individual work items in the plan. Each node should be atomic an
 | Field                  | Type          | Description                              |
 | ---------------------- | ------------- | ---------------------------------------- |
 | `id`                   | string        | Unique node identifier                   |
+| `status`               | string        | Node status (see Status Values below)    |
 | `materialization`      | number        | Commitment level (0.0-1.0)               |
 | `description`          | string        | Brief, one-line description              |
 | `detailed_description` | string        | Comprehensive execution guidance         |
@@ -318,6 +385,15 @@ Nodes represent individual work items in the plan. Each node should be atomic an
 | `downstream`          | array[string] | IDs of dependent nodes            |
 
 ## Field Details
+
+### Status Values
+
+The `status` field indicates the current state of a node:
+
+- **`Completed`**: Node has been successfully executed
+- **`Ready`**: Node is ready to be executed (all dependencies met)
+- **`Blocked`**: Node is waiting on dependencies or external factors
+- **`Paused`**: Node execution has been temporarily suspended
 
 ### Materialization
 
@@ -394,7 +470,7 @@ acceptance_criteria:
 ## Example Plan Structure
 
 ```yaml
-version: "0.2"
+version: "0.3"
 plan_id: "example-001"
 project_name: "Example Project"
 agent_profile: "ai-coding-agent-v1"
@@ -419,6 +495,7 @@ entry_node: "setup-project"
 
 nodes:
   - id: "setup-project"
+    status: "Ready"
     materialization: 1.0
     description: "Initialize project structure"
     detailed_description: |
@@ -429,6 +506,7 @@ nodes:
     downstream: ["implement-core-feature"]
 
   - id: "implement-core-feature"
+    status: "Blocked"
     materialization: 0.8
     description: "Build main application feature"
     detailed_description: |
@@ -441,7 +519,8 @@ nodes:
 
 ## Version History
 
-- **v0.2**: Current version with full schema specification
+- **v0.3**: Added node status field for execution tracking
+- **v0.2**: Full schema specification
 - **v0.1**: Initial draft specification
 
 ## References
@@ -449,10 +528,12 @@ nodes:
 1. Stanley, K. O., & Lehman, J. (2015). _Why Greatness Cannot Be Planned: The Myth of the Objective_. Springer.
 2. Pheng, L. (2025). _Visualizing Task Breakdown: An Interactive Force-Directed Graph Approach to Task Management_. University of Virginia Technical Report.
 
+
+
 ================================================
-EXAMPLE
+FILE: examples/feature-flags-backend.yaml
 ================================================
-version: "0.2"
+version: "0.3"
 plan_id: "symbolic-mpc-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"
@@ -490,6 +571,7 @@ entry_node: "define-feature-flag-api"
 # ------------------- Symbolic MPC Nodes -----------------------------
 nodes:
   - id: "define-feature-flag-api"
+    status: "Completed"
     materialization: 1.0 # Fully committed
     description: "Create REST endpoints to CRUD feature flags."
     detailed_description: |
@@ -513,6 +595,7 @@ nodes:
     downstream: ["implement-dynamo-storage", "write-unit-tests"]
 
   - id: "implement-dynamo-storage"
+    status: "Ready"
     materialization: 0.7 # Likely but still adjustable
     description: "Persist flag objects in DynamoDB."
     detailed_description: |
@@ -531,6 +614,7 @@ nodes:
     downstream: ["write-integration-tests"]
 
   - id: "write-unit-tests"
+    status: "Ready"
     materialization: 0.9
     description: "Cover handler logic with Jest."
     detailed_description: |
@@ -545,6 +629,7 @@ nodes:
     downstream: []
 
   - id: "write-integration-tests"
+    status: "Blocked"
     materialization: 0.4
     description: "End-to-end tests hitting a local DynamoDB container."
     detailed_description: |
@@ -557,4 +642,3 @@ nodes:
     required_knowledge: ["Docker", "jest"]
     agent_action: "Write integration tests."
     downstream: []
-
