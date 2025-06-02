@@ -1,4 +1,4 @@
-# Symbolic MPC Specification v0.3
+# Symbolic MPC Specification v0.4
 
 ## Overview
 
@@ -22,7 +22,7 @@ Symbolic MPC plans are written in YAML format and should be named using the patt
 
 | Field           | Type   | Description                                       |
 | --------------- | ------ | ------------------------------------------------- |
-| `version`       | string | Specification version (currently "0.3")           |
+| `version`       | string | Specification version (currently "0.4")           |
 | `plan_id`       | string | Unique identifier for this plan                   |
 | `project_name`  | string | Human-readable project name                       |
 | `agent_profile` | string | Target agent profile (e.g., "ai-coding-agent-v1") |
@@ -183,6 +183,7 @@ Nodes form a directed acyclic graph (DAG) through the `downstream` field:
 - Use node IDs to reference dependencies
 - Avoid circular dependencies
 - The `entry_node` should have `materialization: 1.0`
+- **There must be exactly one root node** (a node with no incoming edges)
 
 ## Best Practices
 
@@ -212,7 +213,7 @@ acceptance_criteria:
 ## Example Plan Structure
 
 ```yaml
-version: "0.3"
+version: "0.4"
 plan_id: "example-001"
 project_name: "Example Project"
 agent_profile: "ai-coding-agent-v1"
@@ -261,6 +262,7 @@ nodes:
 
 ## Version History
 
+- **v0.4**: Added constraint requiring exactly one root node in the graph
 - **v0.3**: Added node status field for execution tracking
 - **v0.2**: Full schema specification
 - **v0.1**: Initial draft specification

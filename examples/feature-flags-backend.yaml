@@ -1,4 +1,4 @@
-version: "0.3"
+version: "0.4"
 plan_id: "symbolic-mpc-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"

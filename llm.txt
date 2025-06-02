@@ -52,7 +52,7 @@ npm i
 Name it `<project>-symbolic-mpc.yaml`:
 
 ```yaml
-version: "0.3"
+version: "0.4"
 plan_id: "ff-backend-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"
@@ -83,7 +83,7 @@ If the plan is valid, you’re ready to feed the **entry node** to your AI codin
 | `materialization`      | **0–1 float** — how "locked‑in" the node is. The agent may reorder or rewrite nodes with values < 1. |
 | `detailed_description` | Paragraph‑level guidance so the agent can act with **zero clarification**.                           |
 | `acceptance_criteria`  | Bullet list the human (or CI) will check before accepting the node’s PR.                             |
-| `downstream`           | Forward pointers to dependent nodes; the graph is acyclic by convention.                             |
+| `downstream`           | Forward pointers to dependent nodes; the graph is acyclic with exactly one root node.                |
 
 See **`docs/SPEC.md`** for the full field reference.
 
@@ -256,7 +256,7 @@ See **`docs/SPEC.md`** for the full field reference.
   }
 }
 
-# Symbolic MPC Specification v0.3
+# Symbolic MPC Specification v0.4
 
 ## Overview
 
@@ -280,7 +280,7 @@ Symbolic MPC plans are written in YAML format and should be named using the patt
 
 | Field           | Type   | Description                                       |
 | --------------- | ------ | ------------------------------------------------- |
-| `version`       | string | Specification version (currently "0.3")           |
+| `version`       | string | Specification version (currently "0.4")           |
 | `plan_id`       | string | Unique identifier for this plan                   |
 | `project_name`  | string | Human-readable project name                       |
 | `agent_profile` | string | Target agent profile (e.g., "ai-coding-agent-v1") |
@@ -441,6 +441,7 @@ Nodes form a directed acyclic graph (DAG) through the `downstream` field:
 - Use node IDs to reference dependencies
 - Avoid circular dependencies
 - The `entry_node` should have `materialization: 1.0`
+- **There must be exactly one root node** (a node with no incoming edges)
 
 ## Best Practices
 
@@ -470,7 +471,7 @@ acceptance_criteria:
 ## Example Plan Structure
 
 ```yaml
-version: "0.3"
+version: "0.4"
 plan_id: "example-001"
 project_name: "Example Project"
 agent_profile: "ai-coding-agent-v1"
@@ -519,6 +520,7 @@ nodes:
 
 ## Version History
 
+- **v0.4**: Added constraint requiring exactly one root node in the graph
 - **v0.3**: Added node status field for execution tracking
 - **v0.2**: Full schema specification
 - **v0.1**: Initial draft specification
@@ -533,7 +535,7 @@ nodes:
 ================================================
 FILE: examples/feature-flags-backend.yaml
 ================================================
-version: "0.3"
+version: "0.4"
 plan_id: "symbolic-mpc-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"

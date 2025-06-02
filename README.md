@@ -52,7 +52,7 @@ npm i
 Name it `<project>-symbolic-mpc.yaml`:
 
 ```yaml
-version: "0.3"
+version: "0.4"
 plan_id: "ff-backend-001"
 project_name: "Feature Flags Backend"
 agent_profile: "ai-coding-agent-v1"
@@ -83,7 +83,7 @@ If the plan is valid, you’re ready to feed the **entry node** to your AI codin
 | `materialization`      | **0–1 float** — how "locked‑in" the node is. The agent may reorder or rewrite nodes with values < 1. |
 | `detailed_description` | Paragraph‑level guidance so the agent can act with **zero clarification**.                           |
 | `acceptance_criteria`  | Bullet list the human (or CI) will check before accepting the node’s PR.                             |
-| `downstream`           | Forward pointers to dependent nodes; the graph is acyclic by convention.                             |
+| `downstream`           | Forward pointers to dependent nodes; the graph is acyclic with exactly one root node.                |
 
 See **`docs/SPEC.md`** for the full field reference.
 
@@ -96,8 +96,8 @@ See **`docs/SPEC.md`** for the full field reference.
 
 ## Roadmap
 
-- **v0.3** — Typed reference implementation in TypeScript (plan loader + decay heuristic).
-- **v0.4** — CLI scaffolder (`mpc init`) to bootstrap new plans.
+- **v0.4** — Added constraint requiring exactly one root node in the graph.
+- **v0.5** — CLI scaffolder (`mpc init`) to bootstrap new plans.
 - **v1.0** — Stable spec; backwards‑compat promise.
 
 ## License
