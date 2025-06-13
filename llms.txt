@@ -1,0 +1,217 @@
+# Symbolic MPC - Essential Reference for Creating MPC Files
+
+## Quick Start
+
+To create a valid MPC file, you need:
+1. Required top-level fields: version, plan_id, project_name, agent_profile, architecture, tooling, entry_node, nodes
+2. Exactly one root node (a node with no incoming edges) 
+3. The entry_node must be the root node
+4. All nodes must have: id, status, materialization, description, detailed_description, outputs, agent_action
+
+## Schema Structure
+
+### Top-Level Fields
+```yaml
+version: "0.4"
+plan_id: "unique-identifier"
+project_name: "Human-readable name"
+agent_profile: "ai-coding-agent-v1"
+entry_node: "root-node-id"  # Must be the root node
+
+context:  # Optional
+  business_goal: "High-level objective"
+  non_functional_requirements: ["Performance", "Security"]
+  personas:
+    - name: "Developer"
+      need: "Clean API"
+
+architecture:
+  overview: "System architecture description"  # Required
+  constraints: ["No external deps"]  # Optional
+  integration_points: ["External APIs"]  # Optional
+
+tooling:
+  primary_language: "TypeScript"  # Required
+  frameworks: ["React", "Node.js"]  # Required, min 1
+  package_manager: "npm"  # Required
+  secondary_languages: ["SQL"]  # Optional
+  coding_standards:  # Optional
+    lint: "eslint"
+    formatting: "prettier"
+    testing: "jest"
+
+nodes: []  # Array of node objects
+```
+
+### Node Structure
+```yaml
+- id: "unique-node-id"
+  status: "Ready"  # Enum: Completed, Ready, In Progress, Blocked, Paused, Waiting
+  materialization: 0.8  # 0.0-1.0, how committed this node is
+  description: "Brief one-line description"
+  detailed_description: |
+    Multi-line detailed guidance for execution.
+    Be specific about files, commands, and expected outcomes.
+  outputs: ["src/file.ts", "api/*.js"]  # Required array
+  agent_action: "Specific action for agent"  # Required
+  
+  # Optional fields
+  inputs: ["dependency-files"]
+  acceptance_criteria: ["Tests pass", "No lint errors"]
+  definition_of_done: "Clear completion criteria"
+  required_knowledge: ["React hooks", "AWS CDK"]
+  downstream: ["next-node-id", "another-node-id"]
+```
+
+## Key Rules
+
+1. **Graph Structure**: Must have exactly one root node (no incoming edges)
+2. **Entry Node**: Must be the root node
+3. **Materialization**: Entry node should have 1.0, downstream nodes lower
+4. **Status Values**: Use correct enum values
+5. **Downstream References**: All referenced node IDs must exist
+
+## Minimal Valid Example
+
+```yaml
+version: "0.4"
+plan_id: "minimal-001"
+project_name: "Minimal Example"
+agent_profile: "ai-coding-agent-v1"
+architecture:
+  overview: "Simple application"
+tooling:
+  primary_language: "JavaScript"
+  frameworks: ["Node.js"]
+  package_manager: "npm"
+entry_node: "setup"
+nodes:
+  - id: "setup"
+    status: "Ready"
+    materialization: 1.0
+    description: "Initialize project"
+    detailed_description: "Create package.json and basic structure"
+    outputs: ["package.json"]
+    agent_action: "Generate project files"
+    downstream: ["implement"]
+  - id: "implement"
+    status: "Blocked"
+    materialization: 0.7
+    description: "Implement core feature"
+    detailed_description: "Build the main functionality"
+    outputs: ["src/index.js"]
+    agent_action: "Write implementation"
+```
+
+## Full Example Structure
+
+version: "0.4"
+plan_id: "symbolic-mpc-001"
+project_name: "Feature Flags Backend"
+agent_profile: "ai-coding-agent-v1"
+
+# --- Global context the agent will reuse in every node -------------
+context:
+  business_goal: "Allow product managers to toggle features per user cohort without deploys."
+  non_functional_requirements:
+    - "P99 API latency < 150 ms"
+    - "Cost ceiling: $20/month for 10 M evals"
+  personas:
+    - name: "PM"
+      need: "Enable / disable flags visually"
+    - name: "Backend Engineer"
+      need: "Query flag state with minimal latency"
+
+architecture:
+  overview: "Stateless Lambda functions fronted by API Gateway, DynamoDB for storage."
+  constraints:
+    - "No long-lived EC2 instances"
+    - "IaC via AWS CDK (TypeScript)"
+
+tooling:
+  primary_language: "TypeScript"
+  secondary_languages: ["YAML", "JSON"]
+  frameworks: ["AWS CDK", "Node.js 20", "Jest"]
+  package_manager: "pnpm"
+  coding_standards:
+    lint: "eslint-config-standard-with-typescript"
+    formatting: "prettier"
+    testing: "100 % branches on new code"
+
+entry_node: "define-feature-flag-api"
+
+# ------------------- Symbolic MPC Nodes -----------------------------
+nodes:
+  - id: "define-feature-flag-api"
+    status: "Completed"
+    materialization: 1.0 # Fully committed
+    description: "Create REST endpoints to CRUD feature flags."
+    detailed_description: |
+      * Three routes: POST /flags, GET /flags/{id}, GET /flags
+      * POST body schema:
+          { name: string, variations: string[], rollout: { type: "percentage", value: number } }
+      * Return 201 with Location header on create.
+      * Use AWS CDK constructs: RestApi, LambdaIntegration.
+    inputs: []
+    outputs: ["api/handlers/*.ts", "cdk/lib/api-stack.ts", "openapi.yaml"]
+    acceptance_criteria:
+      - "Local CDK synth succeeds with `cdk synth`."
+      - "OpenAPI file validates with spectral."
+      - "Handlers compile with no eslint errors."
+    definition_of_done: |
+      PR containing CDK stack, handlers, and OpenAPI spec that passes CI.
+    required_knowledge:
+      - "AWS CDK REST API patterns"
+      - "TypeScript async/await"
+    agent_action: "Generate code + OpenAPI; push commit."
+    downstream: ["implement-dynamo-storage", "write-unit-tests"]
+
+  - id: "implement-dynamo-storage"
+    status: "Ready"
+    materialization: 0.7 # Likely but still adjustable
+    description: "Persist flag objects in DynamoDB."
+    detailed_description: |
+      * Table name: FlagsTable
+      * Partition key: flagId (ULID)
+      * GSI-1: name -> flagId
+      * Use DocumentClient v3.
+      * Provide CRUD functions in `data/flags.ts`.
+    inputs: ["openapi.yaml", "flag handler skeletons"]
+    outputs: ["data/flags.ts", "cdk/lib/storage-stack.ts"]
+    acceptance_criteria:
+      - "`npm run test:data` passes with mocked DynamoDB."
+    definition_of_done: "Data layer code + table definition in CDK."
+    required_knowledge: ["DynamoDB modelling", "AWS SDK v3"]
+    agent_action: "Write data access layer and update CDK app."
+    downstream: ["write-integration-tests"]
+
+  - id: "write-unit-tests"
+    status: "Ready"
+    materialization: 0.9
+    description: "Cover handler logic with Jest."
+    detailed_description: |
+      Focus on input validation, response codes, and error paths.
+    inputs: ["handlers"]
+    outputs: ["test/handlers/*.test.ts"]
+    acceptance_criteria:
+      - ">= 95 % statement coverage on handlers."
+    definition_of_done: "Green Jest run in CI."
+    required_knowledge: ["jest", "@aws-sdk/client-mock"]
+    agent_action: "Generate tests."
+    downstream: []
+
+  - id: "write-integration-tests"
+    status: "Blocked"
+    materialization: 0.4
+    description: "End-to-end tests hitting a local DynamoDB container."
+    detailed_description: |
+      Use dynamodb-local + aws-sdk v3. Spin up in `docker-compose.test.yml`.
+    inputs: ["FlagsTable", "data layer"]
+    outputs: ["test/integration/*.test.ts", "docker-compose.test.yml"]
+    acceptance_criteria:
+      - "All CRUD flows succeed."
+    definition_of_done: "CI workflow green on integration job."
+    required_knowledge: ["Docker", "jest"]
+    agent_action: "Write integration tests."
+    downstream: []
+
