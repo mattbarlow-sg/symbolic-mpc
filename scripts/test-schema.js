@@ -7,7 +7,7 @@ const Ajv = require("ajv");
 const addFormats = require("ajv-formats");
 
 // Load schema from the package directory
-const schemaPath = path.join(__dirname, "symbolic-mpc.schema.json");
+const schemaPath = path.join(__dirname, "..", "symbolic-mpc.schema.json");
 const schema = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
 
 const ajv = new Ajv({ strict: false, validateSchema: false });
