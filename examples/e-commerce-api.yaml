@@ -1,0 +1,232 @@
+version: "0.4"
+plan_id: "symbolic-mpc-003"
+project_name: "E-commerce REST API"
+agent_profile: "ai-coding-agent-v1"
+
+# --- Global context the agent will reuse in every node -------------
+context:
+  business_goal: "Build a scalable e-commerce API supporting product catalog, cart management, and order processing."
+  non_functional_requirements:
+    - "Handle 50K products with search"
+    - "Sub-200ms API response time"
+    - "Payment processing integration"
+  personas:
+    - name: "Frontend Developer"
+      need: "Clean REST API with proper error handling"
+    - name: "Mobile App Developer"
+      need: "Lightweight endpoints for mobile performance"
+    - name: "Business Analyst"
+      need: "Analytics endpoints for sales reporting"
+
+architecture:
+  overview: "Python FastAPI with PostgreSQL, Redis for caching, Stripe for payments, deployed on AWS."
+  constraints:
+    - "PCI DSS compliance for payment data"
+    - "Multi-tenant architecture support"
+    - "API versioning strategy"
+
+tooling:
+  primary_language: "Python"
+  secondary_languages: ["SQL", "YAML"]
+  frameworks: ["FastAPI", "SQLAlchemy", "Pydantic", "Pytest"]
+  package_manager: "pip"
+  coding_standards:
+    lint: "ruff with strict settings"
+    formatting: "black"
+    testing: "95% code coverage minimum"
+
+entry_node: "setup-fastapi-project"
+
+# ------------------- Symbolic MPC Nodes -----------------------------
+nodes:
+  - id: "setup-fastapi-project"
+    status: "Ready"
+    materialization: 1.0
+    description: "Initialize FastAPI project with core dependencies."
+    detailed_description: |
+      * Create requirements.txt with FastAPI, SQLAlchemy, Pydantic
+      * Setup project structure: app/, tests/, migrations/
+      * Configure database connection and models
+      * Setup environment configuration
+      * Create main.py with basic FastAPI app
+    inputs: []
+    outputs: ["requirements.txt", "app/main.py", "app/config.py", "app/database.py"]
+    acceptance_criteria:
+      - "pip install -r requirements.txt succeeds"
+      - "uvicorn app.main:app starts without errors"
+      - "FastAPI docs accessible at /docs"
+    definition_of_done: "Basic FastAPI app running with database connection."
+    required_knowledge:
+      - "FastAPI framework"
+      - "SQLAlchemy ORM"
+    agent_action: "Generate FastAPI project structure and configuration."
+    downstream: ["create-product-models", "implement-auth-middleware"]
+
+  - id: "create-product-models"
+    status: "Blocked"
+    materialization: 0.8
+    description: "Define product catalog database models."
+    detailed_description: |
+      * Product model with: id, name, description, price, stock, category
+      * Category model with hierarchical structure
+      * Product images and variants support
+      * SQLAlchemy models with proper relationships
+      * Database migrations with Alembic
+    inputs: ["project structure"]
+    outputs: ["app/models/product.py", "app/models/category.py", "migrations/"]
+    acceptance_criteria:
+      - "Database migrations run successfully"
+      - "Product model validates price format"
+      - "Category hierarchy works correctly"
+    definition_of_done: "Product catalog schema created with test data."
+    required_knowledge: ["SQLAlchemy", "PostgreSQL", "Data modeling"]
+    agent_action: "Create product and category models with migrations."
+    downstream: ["implement-product-api"]
+
+  - id: "implement-product-api"
+    status: "Blocked"
+    materialization: 0.7
+    description: "Create product catalog REST endpoints."
+    detailed_description: |
+      * GET /products - List products with pagination and filters
+      * GET /products/{id} - Get single product details
+      * POST /products - Create new product (admin only)
+      * PUT /products/{id} - Update product (admin only)
+      * DELETE /products/{id} - Soft delete product (admin only)
+      * GET /categories - List all categories
+    inputs: ["product models"]
+    outputs: ["app/routers/products.py", "app/schemas/product.py"]
+    acceptance_criteria:
+      - "Product search works with filters"
+      - "Pagination returns proper metadata"
+      - "Admin endpoints require authentication"
+    definition_of_done: "Product API working with OpenAPI documentation."
+    required_knowledge: ["FastAPI routing", "Pydantic schemas", "Query parameters"]
+    agent_action: "Implement product CRUD endpoints with validation."
+    downstream: ["implement-cart-system", "add-product-search"]
+
+  - id: "implement-auth-middleware"
+    status: "Blocked"
+    materialization: 0.9
+    description: "Add JWT authentication middleware."
+    detailed_description: |
+      * JWT token generation and validation
+      * User model with roles (customer, admin)
+      * Login and registration endpoints
+      * Protected route decorators
+      * Password hashing with bcrypt
+    inputs: ["project structure"]
+    outputs: ["app/auth.py", "app/models/user.py", "app/routers/auth.py"]
+    acceptance_criteria:
+      - "JWT tokens properly signed and validated"
+      - "Role-based access control works"
+      - "Password security follows best practices"
+    definition_of_done: "Authentication system working with protected routes."
+    required_knowledge: ["JWT", "FastAPI dependencies", "Security best practices"]
+    agent_action: "Implement JWT authentication and authorization."
+    downstream: ["implement-cart-system"]
+
+  - id: "implement-cart-system"
+    status: "Blocked"
+    materialization: 0.6
+    description: "Build shopping cart functionality."
+    detailed_description: |
+      * Cart model linked to users
+      * CartItem model with product and quantity
+      * Add/remove items from cart
+      * Cart totals calculation
+      * Session-based carts for anonymous users
+    inputs: ["product models", "auth middleware"]
+    outputs: ["app/models/cart.py", "app/routers/cart.py"]
+    acceptance_criteria:
+      - "Cart persists across user sessions"
+      - "Inventory validation prevents overselling"
+      - "Cart totals include taxes and discounts"
+    definition_of_done: "Shopping cart system working with user authentication."
+    required_knowledge: ["Session management", "Business logic", "Data consistency"]
+    agent_action: "Create cart models and endpoints."
+    downstream: ["implement-order-processing"]
+
+  - id: "add-product-search"
+    status: "Blocked"
+    materialization: 0.5
+    description: "Implement product search with filters."
+    detailed_description: |
+      * Full-text search on product name and description
+      * Price range filtering
+      * Category and brand filters
+      * Search result ranking
+      * Redis caching for popular searches
+    inputs: ["product API"]
+    outputs: ["app/services/search.py", "app/routers/search.py"]
+    acceptance_criteria:
+      - "Search returns relevant results quickly"
+      - "Filters can be combined effectively"
+      - "Search performance under load"
+    definition_of_done: "Product search working with caching."
+    required_knowledge: ["PostgreSQL full-text search", "Redis caching", "Performance optimization"]
+    agent_action: "Add search functionality with caching."
+    downstream: ["write-api-tests"]
+
+  - id: "implement-order-processing"
+    status: "Blocked"
+    materialization: 0.4
+    description: "Create order management system."
+    detailed_description: |
+      * Order model with items and status tracking
+      * Order state machine (pending, paid, shipped, delivered)
+      * Stripe payment integration
+      * Inventory reservation and release
+      * Order confirmation emails
+    inputs: ["cart system"]
+    outputs: ["app/models/order.py", "app/services/payment.py", "app/routers/orders.py"]
+    acceptance_criteria:
+      - "Orders process payments successfully"
+      - "Inventory updates correctly on order"
+      - "Order status updates properly"
+    definition_of_done: "Order system working with payment processing."
+    required_knowledge: ["Stripe API", "State machines", "Transaction handling"]
+    agent_action: "Build order processing with payment integration."
+    downstream: ["write-integration-tests"]
+
+  - id: "write-api-tests"
+    status: "Blocked"
+    materialization: 0.8
+    description: "Create comprehensive test suite for API endpoints."
+    detailed_description: |
+      * Unit tests for all models and services
+      * Integration tests for API endpoints
+      * Test database fixtures and factories
+      * Authentication and authorization tests
+      * Error handling and edge case tests
+    inputs: ["all API endpoints"]
+    outputs: ["tests/test_products.py", "tests/test_auth.py", "tests/test_cart.py"]
+    acceptance_criteria:
+      - "95% code coverage achieved"
+      - "All endpoints tested with various scenarios"
+      - "Tests run fast with proper isolation"
+    definition_of_done: "Comprehensive test suite passing in CI."
+    required_knowledge: ["Pytest", "FastAPI testing", "Test fixtures"]
+    agent_action: "Write complete test suite for API."
+    downstream: []
+
+  - id: "write-integration-tests"
+    status: "Blocked"
+    materialization: 0.3
+    description: "Create end-to-end integration tests."
+    detailed_description: |
+      * Docker compose for test environment
+      * Complete user journey tests
+      * Payment processing tests with Stripe test mode
+      * Performance tests for high load scenarios
+      * Database transaction rollback tests
+    inputs: ["complete API", "order processing"]
+    outputs: ["tests/integration/", "docker-compose.test.yml", "tests/performance/"]
+    acceptance_criteria:
+      - "E2E tests cover complete user flows"
+      - "Performance tests validate response times"
+      - "Integration tests run in CI pipeline"
+    definition_of_done: "Full integration test suite automated."
+    required_knowledge: ["Docker", "Load testing", "CI/CD pipelines"]
+    agent_action: "Create comprehensive integration test suite."
+    downstream: []

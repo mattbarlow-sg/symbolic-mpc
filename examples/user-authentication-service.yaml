@@ -1,0 +1,164 @@
+version: "0.4"
+plan_id: "symbolic-mpc-002"
+project_name: "User Authentication Service"
+agent_profile: "ai-coding-agent-v1"
+
+# --- Global context the agent will reuse in every node -------------
+context:
+  business_goal: "Provide secure user authentication and authorization for multiple applications."
+  non_functional_requirements:
+    - "99.9% uptime SLA"
+    - "Support 10K concurrent users"
+    - "JWT token expiry < 1 hour"
+  personas:
+    - name: "Application Developer"
+      need: "Easy integration with JWT validation"
+    - name: "Security Admin"
+      need: "Audit logs and role management"
+    - name: "End User"
+      need: "Fast login with MFA support"
+
+architecture:
+  overview: "Node.js Express API with PostgreSQL, Redis for sessions, deployed on Kubernetes."
+  constraints:
+    - "Must support OAuth2.0 and SAML"
+    - "GDPR compliant data handling"
+    - "Zero-downtime deployments"
+
+tooling:
+  primary_language: "TypeScript"
+  secondary_languages: ["SQL", "YAML"]
+  frameworks: ["Express.js", "TypeORM", "Passport.js", "Jest"]
+  package_manager: "npm"
+  coding_standards:
+    lint: "eslint with airbnb config"
+    formatting: "prettier"
+    testing: "90% code coverage minimum"
+
+entry_node: "setup-project-structure"
+
+# ------------------- Symbolic MPC Nodes -----------------------------
+nodes:
+  - id: "setup-project-structure"
+    status: "Ready"
+    materialization: 1.0
+    description: "Initialize TypeScript project with Express and dependencies."
+    detailed_description: |
+      * Create package.json with all required dependencies
+      * Setup TypeScript configuration (tsconfig.json)
+      * Configure ESLint and Prettier
+      * Create basic folder structure: src/, tests/, config/
+      * Setup build scripts and dev environment
+    inputs: []
+    outputs: ["package.json", "tsconfig.json", ".eslintrc.js", "src/index.ts"]
+    acceptance_criteria:
+      - "npm install completes successfully"
+      - "npm run build compiles without errors"
+      - "npm run lint passes"
+    definition_of_done: |
+      Basic project structure ready with all tooling configured.
+    required_knowledge:
+      - "Node.js project setup"
+      - "TypeScript configuration"
+    agent_action: "Generate initial project files and configuration."
+    downstream: ["create-user-model", "implement-auth-endpoints"]
+
+  - id: "create-user-model"
+    status: "Blocked"
+    materialization: 0.8
+    description: "Define User entity and database schema."
+    detailed_description: |
+      * User table with fields: id, email, password_hash, created_at, updated_at
+      * Roles table for RBAC
+      * User_Roles junction table
+      * TypeORM entities and migrations
+      * Password hashing with bcrypt
+    inputs: ["project structure"]
+    outputs: ["src/entities/User.ts", "src/entities/Role.ts", "migrations/*.ts"]
+    acceptance_criteria:
+      - "TypeORM migrations run successfully"
+      - "User entity validates email format"
+      - "Password is properly hashed"
+    definition_of_done: "Database schema created with proper indices."
+    required_knowledge: ["TypeORM", "PostgreSQL", "Security best practices"]
+    agent_action: "Create entities and migration files."
+    downstream: ["implement-auth-endpoints"]
+
+  - id: "implement-auth-endpoints"
+    status: "Blocked"
+    materialization: 0.7
+    description: "Create authentication REST endpoints."
+    detailed_description: |
+      * POST /auth/register - User registration
+      * POST /auth/login - User login with JWT generation
+      * POST /auth/refresh - Token refresh
+      * POST /auth/logout - Session invalidation
+      * GET /auth/profile - Get current user info
+      * Implement JWT strategy with Passport.js
+    inputs: ["User model", "project structure"]
+    outputs: ["src/routes/auth.ts", "src/middleware/auth.ts", "src/services/auth.service.ts"]
+    acceptance_criteria:
+      - "All endpoints return proper HTTP status codes"
+      - "JWT tokens are properly signed"
+      - "Refresh tokens stored in Redis"
+    definition_of_done: "Auth endpoints working with Postman tests."
+    required_knowledge: ["JWT", "Passport.js", "Express middleware"]
+    agent_action: "Implement authentication logic and routes."
+    downstream: ["add-oauth-support", "write-auth-tests"]
+
+  - id: "add-oauth-support"
+    status: "Blocked"
+    materialization: 0.5
+    description: "Integrate OAuth2.0 providers."
+    detailed_description: |
+      * Support Google and GitHub OAuth
+      * Implement OAuth callback handlers
+      * Link OAuth accounts to local users
+      * Store OAuth tokens securely
+    inputs: ["auth endpoints"]
+    outputs: ["src/strategies/oauth.ts", "src/routes/oauth.ts"]
+    acceptance_criteria:
+      - "OAuth flow completes successfully"
+      - "Users can link multiple OAuth accounts"
+    definition_of_done: "OAuth login working for Google and GitHub."
+    required_knowledge: ["OAuth2.0", "Passport OAuth strategies"]
+    agent_action: "Add OAuth provider integration."
+    downstream: ["write-integration-tests"]
+
+  - id: "write-auth-tests"
+    status: "Blocked"
+    materialization: 0.9
+    description: "Write comprehensive test suite for auth module."
+    detailed_description: |
+      * Unit tests for auth service methods
+      * Integration tests for auth endpoints
+      * Test edge cases: invalid tokens, expired tokens, etc.
+      * Mock external dependencies
+    inputs: ["auth implementation"]
+    outputs: ["tests/unit/auth.test.ts", "tests/integration/auth.test.ts"]
+    acceptance_criteria:
+      - "90% code coverage achieved"
+      - "All auth scenarios tested"
+    definition_of_done: "All tests passing in CI pipeline."
+    required_knowledge: ["Jest", "Supertest", "Testing best practices"]
+    agent_action: "Write comprehensive test suite."
+    downstream: []
+
+  - id: "write-integration-tests"
+    status: "Blocked"
+    materialization: 0.6
+    description: "Create end-to-end tests with test database."
+    detailed_description: |
+      * Docker compose for test environment
+      * Test complete auth flows
+      * Performance tests for concurrent logins
+      * Security tests for common vulnerabilities
+    inputs: ["all auth features"]
+    outputs: ["tests/e2e/*.test.ts", "docker-compose.test.yml"]
+    acceptance_criteria:
+      - "E2E tests cover all user journeys"
+      - "Tests run in isolated environment"
+    definition_of_done: "Integration tests automated in CI."
+    required_knowledge: ["Docker", "E2E testing", "Security testing"]
+    agent_action: "Create comprehensive integration test suite."
+    downstream: []

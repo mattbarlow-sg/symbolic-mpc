@@ -6,7 +6,9 @@ const yaml = require("js-yaml");
 const Ajv = require("ajv");
 const addFormats = require("ajv-formats");
 
-const schema = JSON.parse(fs.readFileSync("symbolic-mpc.schema.json", "utf8"));
+// Load schema from the package directory
+const schemaPath = path.join(__dirname, "symbolic-mpc.schema.json");
+const schema = JSON.parse(fs.readFileSync(schemaPath, "utf8"));
 
 const ajv = new Ajv({ strict: false, validateSchema: false });
 addFormats(ajv);
@@ -85,31 +87,57 @@ function validateFile(filePath) {
   }
 }
 
-// If a specific file is provided, validate just that file
-if (process.argv[2]) {
-  const isValid = validateFile(process.argv[2]);
-  process.exit(isValid ? 0 : 1);
-}
+// Handle command line arguments
+const args = process.argv.slice(2);
 
-// Otherwise, validate all example files
-const examplesDir = "examples";
-if (!fs.existsSync(examplesDir)) {
-  console.log("❌ Examples directory not found");
+if (args.length === 0) {
+  console.log("Usage: symbolic-mpc-test <file.yaml> [file2.yaml ...]");
+  console.log("       symbolic-mpc-test <directory>");
+  console.log("\nValidates YAML files against the Symbolic MPC schema.");
   process.exit(1);
 }
 
-const files = fs
-  .readdirSync(examplesDir)
-  .filter((file) => file.endsWith(".yaml") || file.endsWith(".yml"))
-  .map((file) => path.join(examplesDir, file));
+let filesToValidate = [];
 
-if (files.length === 0) {
-  console.log("❌ No YAML files found in examples directory");
+// Process each argument
+for (const arg of args) {
+  const resolvedPath = path.resolve(arg);
+  
+  if (!fs.existsSync(resolvedPath)) {
+    console.log(`❌ Path not found: ${arg}`);
+    process.exit(1);
+  }
+  
+  const stat = fs.statSync(resolvedPath);
+  
+  if (stat.isDirectory()) {
+    // Find all YAML files in the directory
+    const yamlFiles = fs
+      .readdirSync(resolvedPath)
+      .filter((file) => file.endsWith(".yaml") || file.endsWith(".yml"))
+      .map((file) => path.join(resolvedPath, file));
+    
+    if (yamlFiles.length === 0) {
+      console.log(`⚠️  No YAML files found in directory: ${arg}`);
+    } else {
+      filesToValidate.push(...yamlFiles);
+    }
+  } else if (stat.isFile()) {
+    filesToValidate.push(resolvedPath);
+  } else {
+    console.log(`❌ Invalid path type: ${arg}`);
+    process.exit(1);
+  }
+}
+
+if (filesToValidate.length === 0) {
+  console.log("❌ No files to validate");
   process.exit(1);
 }
 
+// Validate all files
 let allValid = true;
-for (const file of files) {
+for (const file of filesToValidate) {
   const isValid = validateFile(file);
   allValid = allValid && isValid;
 }

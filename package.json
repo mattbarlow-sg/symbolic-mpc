@@ -1,6 +1,6 @@
 {
   "name": "symbolic-mpc",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "**Symbolic Model‑Predictive Control (MPC)** is a lightweight, rolling‑plan format that lets an AI coding agent (and its human partner) decompose work, execute the next node, then recompute the rest of the task graph on every step.",
   "main": "index.js",
   "directories": {
@@ -32,5 +32,10 @@
   "scripts": {
     "test": "node test-schema.js",
     "lint": "npx prettier --write ."
-  }
+  },
+  "bin": {
+    "symbolic-mpc-test": "./test-schema.js",
+    "verify-mpc": "./verify-mpc-structure.js"
+  },
+  "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977"
 }

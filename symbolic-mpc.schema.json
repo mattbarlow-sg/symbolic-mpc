@@ -13,94 +13,137 @@
     "nodes"
   ],
   "additionalProperties": false,
-
   "properties": {
-    "version": { "type": "string" },
-    "plan_id": { "type": "string" },
-    "project_name": { "type": "string" },
-    "agent_profile": { "type": "string" },
-
+    "version": {
+      "type": "string"
+    },
+    "plan_id": {
+      "type": "string"
+    },
+    "project_name": {
+      "type": "string"
+    },
+    "agent_profile": {
+      "type": "string"
+    },
     "context": {
       "type": "object",
       "additionalProperties": false,
       "properties": {
-        "business_goal": { "type": "string" },
+        "business_goal": {
+          "type": "string"
+        },
         "non_functional_requirements": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
         "personas": {
           "type": "array",
-          "items": { "$ref": "#/$defs/persona" }
-        }
-      }
-    },
-
-    "architecture": {
-      "type": "object",
-      "required": ["overview"],
-      "additionalProperties": false,
-      "properties": {
-        "overview": { "type": "string" },
-        "constraints": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "integration_points": {
-          "type": "array",
-          "items": { "type": "string" }
-        }
-      }
-    },
-
-    "tooling": {
-      "type": "object",
-      "required": ["primary_language", "frameworks", "package_manager"],
-      "additionalProperties": false,
-      "properties": {
-        "primary_language": { "type": "string" },
-        "secondary_languages": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
-        "frameworks": {
-          "type": "array",
-          "items": { "type": "string" },
-          "minItems": 1
-        },
-        "package_manager": { "type": "string" },
-        "coding_standards": {
-          "type": "object",
-          "additionalProperties": false,
-          "properties": {
-            "lint": { "type": "string" },
-            "formatting": { "type": "string" },
-            "testing": { "type": "string" }
+          "items": {
+            "$ref": "#/$defs/persona"
           }
         }
       }
     },
-
-    "entry_node": { "type": "string" },
-
+    "architecture": {
+      "type": "object",
+      "required": [
+        "overview"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "overview": {
+          "type": "string"
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "integration_points": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "tooling": {
+      "type": "object",
+      "required": [
+        "primary_language",
+        "frameworks",
+        "package_manager"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "primary_language": {
+          "type": "string"
+        },
+        "secondary_languages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "frameworks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1
+        },
+        "package_manager": {
+          "type": "string"
+        },
+        "coding_standards": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "lint": {
+              "type": "string"
+            },
+            "formatting": {
+              "type": "string"
+            },
+            "testing": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "entry_node": {
+      "type": "string"
+    },
     "nodes": {
       "type": "array",
       "minItems": 1,
-      "items": { "$ref": "#/$defs/node" }
+      "items": {
+        "$ref": "#/$defs/node"
+      }
     }
   },
-
   "$defs": {
     "persona": {
       "type": "object",
-      "required": ["name", "need"],
+      "required": [
+        "name",
+        "need"
+      ],
       "additionalProperties": false,
       "properties": {
-        "name": { "type": "string" },
-        "need": { "type": "string" }
+        "name": {
+          "type": "string"
+        },
+        "need": {
+          "type": "string"
+        }
       }
     },
-
     "node": {
       "type": "object",
       "required": [
@@ -114,52 +157,69 @@
       ],
       "additionalProperties": false,
       "properties": {
-        "id": { "type": "string" },
-
+        "id": {
+          "type": "string"
+        },
         "status": {
           "type": "string",
-          "enum": ["Completed", "Ready", "Blocked", "Paused"]
+          "enum": [
+            "Completed",
+            "Ready",
+            "In Progress",
+            "Blocked",
+            "Paused",
+            "Waiting"
+          ]
         },
-
         "materialization": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
         },
-
-        "description": { "type": "string" },
-        "detailed_description": { "type": "string" },
-
+        "description": {
+          "type": "string"
+        },
+        "detailed_description": {
+          "type": "string"
+        },
         "inputs": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": []
         },
-
         "outputs": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         },
-
         "acceptance_criteria": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": []
         },
-
-        "definition_of_done": { "type": "string" },
-
+        "definition_of_done": {
+          "type": "string"
+        },
         "required_knowledge": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": []
         },
-
-        "agent_action": { "type": "string" },
-
+        "agent_action": {
+          "type": "string"
+        },
         "downstream": {
           "type": "array",
-          "items": { "type": "string" },
+          "items": {
+            "type": "string"
+          },
           "default": []
         }
       }
